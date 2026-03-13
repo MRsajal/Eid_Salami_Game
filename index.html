@@ -271,6 +271,93 @@
       cursor: auto;
     }
   }
+
+  /* Better defaults for small screens */
+  #game-wrap {
+    /* Let the container shrink on phones instead of forcing 580px */
+    min-height: unset;
+  }
+
+  #canvas-area {
+    /* Make playfield responsive by default */
+    height: clamp(300px, 60vh, 440px);
+  }
+
+  /* Keep HUD from stealing too much vertical space; also avoid overlap */
+  #hud {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  #hud .hud-box {
+    flex: 0 0 auto;
+  }
+
+  /* Make the middle HUD box flexible even with inline style */
+  #hud .hud-box:nth-child(2) {
+    min-width: 0 !important;
+    flex: 1 1 160px;
+  }
+
+  /* Ensure overlay is usable on very small heights */
+  #overlay {
+    padding: 22px 16px;
+    gap: 6px;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+
+    /* Safe areas (iOS notch / home indicator) */
+    padding-top: calc(22px + env(safe-area-inset-top));
+    padding-bottom: calc(22px + env(safe-area-inset-bottom));
+    padding-left: calc(16px + env(safe-area-inset-left));
+    padding-right: calc(16px + env(safe-area-inset-right));
+  }
+
+  #overlay h2 {
+    font-size: clamp(20px, 5vw, 26px);
+  }
+
+  #overlay .sub {
+    font-size: clamp(12px, 3.4vw, 14px);
+    padding: 0;
+    margin: 0 0 10px;
+    line-height: 1.35;
+  }
+
+  #overlay .score-big {
+    font-size: clamp(36px, 10vw, 52px);
+  }
+
+  #play-btn {
+    width: min(320px, 92vw);
+    padding: 12px 18px;
+  }
+
+  /* Small phones */
+  @media (max-width: 420px) {
+    .hud-box {
+      font-size: 12px;
+      padding: 5px 8px;
+    }
+    .hud-val {
+      font-size: 18px;
+    }
+
+    #basket {
+      width: 76px;
+      height: 48px;
+    }
+  }
+
+  /* Landscape phones / short screens */
+  @media (max-height: 480px) {
+    #canvas-area {
+      height: clamp(240px, 55vh, 320px);
+    }
+    #overlay {
+      justify-content: flex-start;
+    }
+  }
 </style>
 
 <div id="game-wrap">
