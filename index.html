@@ -358,6 +358,55 @@
       justify-content: flex-start;
     }
   }
+
+  /* Fullscreen layout (especially useful on mobile) */
+  #game-wrap {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  /* Let the playfield take remaining space under the HUD */
+  #canvas-area {
+    flex: 1 1 auto;
+    height: auto; /* overridden from fixed heights */
+    min-height: 280px;
+  }
+
+  /* Put HUD in normal flow so it doesn't overlap and waste visible space */
+  #hud {
+    position: sticky;
+    top: 0;
+  }
+
+  /* Mobile: truly fullscreen */
+  @media (max-width: 520px) {
+    #game-wrap {
+      min-height: 100dvh;
+      border-radius: 0;
+
+      /* Safe areas */
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    #canvas-area {
+      min-height: 0;
+    }
+
+    #progress-bar {
+      /* keep progress visible above home indicator */
+      bottom: env(safe-area-inset-bottom);
+    }
+  }
+
+  /* Fallback for browsers that don't support dvh */
+  @supports not (height: 100dvh) {
+    @media (max-width: 520px) {
+      #game-wrap {
+        min-height: 100vh;
+      }
+    }
+  }
 </style>
 
 <div id="game-wrap">
