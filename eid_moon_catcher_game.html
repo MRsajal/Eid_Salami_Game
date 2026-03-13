@@ -14,6 +14,10 @@
     overflow: hidden;
     font-family: var(--font-sans);
     user-select: none;
+
+    /* Mobile: prevent double-tap zoom / text selection + smooth touch interactions */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
   }
   .star {
     position: absolute;
@@ -48,6 +52,9 @@
     height: 440px;
     overflow: hidden;
     cursor: none;
+
+    /* Prevent page scroll while playing on touch devices */
+    touch-action: none;
   }
   .moon-obj {
     position: absolute;
@@ -95,6 +102,11 @@
     background: rgba(0, 0, 0, 0.35);
     z-index: 20;
     backdrop-filter: blur(4px);
+
+    /* iOS notch safe-area */
+    padding-top: calc(10px + env(safe-area-inset-top));
+    padding-left: calc(16px + env(safe-area-inset-left));
+    padding-right: calc(16px + env(safe-area-inset-right));
   }
   .hud-box {
     color: #fff;
@@ -182,6 +194,98 @@
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s;
+  }
+
+  /* ---------- Mobile responsive tweaks ---------- */
+  @media (max-width: 520px) {
+    #game-wrap {
+      border-radius: 12px;
+      min-height: 520px;
+    }
+
+    #canvas-area {
+      /* Use viewport height but keep reasonable bounds */
+      height: min(62vh, 420px);
+      cursor: auto; /* show native cursor on small screens */
+    }
+
+    .lantern {
+      font-size: 18px;
+    }
+
+    .moon-obj {
+      font-size: 26px;
+    }
+
+    #basket {
+      width: 76px; /* a bit wider for touch */
+      height: 48px;
+      font-size: 22px;
+    }
+
+    #basket::before {
+      width: 54px;
+      height: 9px;
+      top: -9px;
+    }
+
+    #hud {
+      gap: 8px;
+      padding: 8px 10px;
+    }
+
+    .hud-box {
+      font-size: 12px;
+      padding: 5px 8px;
+      min-width: 62px;
+      border-radius: 10px;
+    }
+
+    .hud-val {
+      font-size: 18px;
+    }
+
+    /* Force the center help box to wrap nicely on small screens
+       (it currently has inline min-width:120px) */
+    #hud .hud-box:nth-child(2) {
+      min-width: 0 !important;
+      flex: 1 1 auto;
+      line-height: 1.15;
+    }
+
+    #overlay h2 {
+      font-size: 22px;
+    }
+
+    #overlay .sub {
+      font-size: 13px;
+      padding: 0 16px;
+      margin-bottom: 14px;
+    }
+
+    #overlay .score-big {
+      font-size: 44px;
+    }
+
+    #play-btn {
+      width: min(260px, 86vw);
+      padding: 12px 18px;
+      font-size: 15px;
+    }
+  }
+
+  /* Reduce height further for very short screens (landscape phones) */
+  @media (max-height: 520px) {
+    #canvas-area {
+      height: 320px;
+    }
+  }
+
+  /* Hide custom cursor behavior on coarse pointers (touch) */
+  @media (pointer: coarse) {
+    #canvas-area {
+      cursor: auto;
+    }
   }
 </style>
 
