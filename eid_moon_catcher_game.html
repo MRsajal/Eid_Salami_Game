@@ -1,0 +1,418 @@
+<style>
+  #game-wrap {
+    position: relative;
+    width: 100%;
+    min-height: 580px;
+    background: linear-gradient(
+      180deg,
+      #0a0a2e 0%,
+      #1a1a5e 40%,
+      #2d1b69 70%,
+      #1a0a3e 100%
+    );
+    border-radius: 16px;
+    overflow: hidden;
+    font-family: var(--font-sans);
+    user-select: none;
+  }
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    animation: twinkle 2s infinite alternate;
+  }
+  @keyframes twinkle {
+    from {
+      opacity: 0.2;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .lantern {
+    position: absolute;
+    font-size: 22px;
+    animation: sway 3s ease-in-out infinite alternate;
+  }
+  @keyframes sway {
+    from {
+      transform: rotate(-8deg);
+    }
+    to {
+      transform: rotate(8deg);
+    }
+  }
+  #canvas-area {
+    position: relative;
+    width: 100%;
+    height: 440px;
+    overflow: hidden;
+    cursor: none;
+  }
+  .moon-obj {
+    position: absolute;
+    font-size: 28px;
+    pointer-events: none;
+    transition: none;
+    z-index: 5;
+  }
+  #basket {
+    position: absolute;
+    bottom: 10px;
+    width: 70px;
+    height: 44px;
+    background: linear-gradient(135deg, #c8860a, #e6a020);
+    border-radius: 0 0 35px 35px;
+    border-top: 3px solid #f0c040;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 12px rgba(240, 180, 0, 0.5);
+  }
+  #basket::before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 8px;
+    border-radius: 4px 4px 0 0;
+    background: #f0c040;
+  }
+  #hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 20;
+    backdrop-filter: blur(4px);
+  }
+  .hud-box {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.1);
+    border: 0.5px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    padding: 5px 12px;
+    min-width: 70px;
+    text-align: center;
+  }
+  .hud-val {
+    font-size: 20px;
+    font-weight: 500;
+    display: block;
+    color: #f0c040;
+  }
+  #overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 10, 46, 0.92);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    border-radius: 16px;
+  }
+  #overlay h2 {
+    color: #f0c040;
+    font-size: 26px;
+    font-weight: 500;
+    margin: 0 0 6px;
+  }
+  #overlay .sub {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    margin: 0 0 18px;
+    text-align: center;
+    padding: 0 24px;
+  }
+  #overlay .score-big {
+    font-size: 52px;
+    color: #f0c040;
+    font-weight: 500;
+    margin: 8px 0;
+  }
+  #play-btn {
+    background: linear-gradient(135deg, #c8860a, #f0c040);
+    color: #1a0a3e;
+    border: none;
+    border-radius: 28px;
+    padding: 12px 36px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: transform 0.15s;
+  }
+  #play-btn:hover {
+    transform: scale(1.05);
+  }
+  #progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #f0c040, #ff9900);
+    transition: width 0.5s linear;
+    z-index: 25;
+  }
+  .score-cap-msg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #f0c040;
+    font-size: 13px;
+    font-weight: 500;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 4px 12px;
+    border-radius: 8px;
+    z-index: 30;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+</style>
+
+<div id="game-wrap">
+  <div id="hud">
+    <div class="hud-box">
+      Score<span class="hud-val" id="score-disp">0</span>
+    </div>
+    <div class="hud-box" style="font-size: 11px; min-width: 120px">
+      🌙 Collect • ⚫ Avoid<br /><span
+        style="font-size: 10px; color: rgba(255, 255, 255, 0.5)"
+        >Max score: 20</span
+      >
+    </div>
+    <div class="hud-box">
+      Time<span class="hud-val" id="timer-disp">30</span>
+    </div>
+  </div>
+
+  <div id="canvas-area">
+    <div id="basket">🧺</div>
+  </div>
+
+  <div id="progress-bar" style="width: 100%"></div>
+
+  <div id="overlay">
+    <div style="font-size: 48px; margin-bottom: 8px">🌙</div>
+    <h2>Eid Moon Catcher</h2>
+    <p class="sub">
+      Move your mouse to catch the crescent moons ☪️<br />Avoid the dark moons —
+      they reduce your score!<br />
+      You have 20 seconds
+    </p>
+    <button id="play-btn" onclick="startGame()">Play Game ✨</button>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const wrap = document.getElementById("game-wrap");
+    const area = document.getElementById("canvas-area");
+    const basket = document.getElementById("basket");
+    const overlay = document.getElementById("overlay");
+    const scoreDisp = document.getElementById("score-disp");
+    const timerDisp = document.getElementById("timer-disp");
+    const progressBar = document.getElementById("progress-bar");
+    const capMsg = document.getElementById("cap-msg");
+
+    let score = 0,
+      timeLeft = 20,
+      gameActive = false;
+    let moons = [],
+      spawnInterval,
+      gameInterval;
+    let basketX = 200;
+    const MAX_SCORE = 200;
+    const GAME_DURATION = 20;
+
+    function buildBg() {
+      for (let i = 0; i < 60; i++) {
+        const s = document.createElement("div");
+        s.className = "star";
+        const size = Math.random() * 2.5 + 0.5;
+        s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random() * 100}%;left:${Math.random() * 100}%;animation-delay:${Math.random() * 3}s;animation-duration:${1.5 + Math.random() * 2}s;`;
+        wrap.appendChild(s);
+      }
+      const lanternEmojis = ["🏮", "🌸", "⭐", "✨"];
+      const positions = [5, 18, 75, 90];
+      positions.forEach((left, i) => {
+        const l = document.createElement("div");
+        l.className = "lantern";
+        l.textContent = lanternEmojis[i % lanternEmojis.length];
+        l.style.cssText = `top:${48 + Math.random() * 20}px;left:${left}%;animation-delay:${i * 0.5}s;z-index:3;`;
+        area.appendChild(l);
+      });
+    }
+
+    buildBg();
+
+    area.addEventListener("mousemove", (e) => {
+      if (!gameActive) return;
+      const rect = area.getBoundingClientRect();
+      basketX = e.clientX - rect.left;
+      basketX = Math.max(35, Math.min(rect.width - 35, basketX));
+      basket.style.left = basketX + "px";
+    });
+
+    area.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!gameActive) return;
+        e.preventDefault();
+        const rect = area.getBoundingClientRect();
+        basketX = e.touches[0].clientX - rect.left;
+        basketX = Math.max(35, Math.min(rect.width - 35, basketX));
+        basket.style.left = basketX + "px";
+      },
+      { passive: false },
+    );
+
+    function spawnMoon() {
+      if (!gameActive) return;
+      const isBlack = Math.random() < 0.28;
+      const el = document.createElement("div");
+      el.className = "moon-obj";
+      el.textContent = isBlack ? "🌑" : "🌙";
+      const areaW = area.clientWidth;
+      const startX = 24 + Math.random() * (areaW - 48);
+      el.style.left = startX + "px";
+      el.style.top = "-36px";
+      el.dataset.black = isBlack ? "1" : "0";
+      el.dataset.x = startX;
+      el.dataset.y = -36;
+      el.dataset.speed = 2 + Math.random() * 2.5;
+      area.appendChild(el);
+      moons.push(el);
+    }
+
+    function showCapMsg() {
+      capMsg.style.opacity = "1";
+      setTimeout(() => (capMsg.style.opacity = "0"), 1200);
+    }
+
+    function gameLoop() {
+      const areaH = area.clientHeight;
+      const basketBottom = areaH - 10;
+
+      moons.forEach((m, idx) => {
+        let y = parseFloat(m.dataset.y) + parseFloat(m.dataset.speed);
+        m.dataset.y = y;
+        m.style.top = y + "px";
+        const mx = parseFloat(m.dataset.x) + 14;
+        const bLeft = basketX - 35;
+        const bRight = basketX + 35;
+        const bTop = basketBottom - 44;
+
+        if (
+          y + 28 >= bTop &&
+          y <= basketBottom &&
+          mx >= bLeft &&
+          mx <= bRight
+        ) {
+          const isBlack = m.dataset.black === "1";
+          if (isBlack) {
+            score = Math.max(0, score - 1);
+          } else {
+            if (score < MAX_SCORE) {
+              score++;
+            } else {
+              showCapMsg();
+            }
+          }
+          scoreDisp.textContent = score;
+          scoreDisp.style.color = isBlack ? "#ff6666" : "#f0c040";
+          setTimeout(() => (scoreDisp.style.color = "#f0c040"), 300);
+          m.remove();
+          moons.splice(idx, 1);
+          return;
+        }
+        if (y > areaH + 10) {
+          m.remove();
+          moons.splice(idx, 1);
+        }
+      });
+    }
+
+    function startGame() {
+      score = 0;
+      timeLeft = GAME_DURATION;
+      gameActive = true;
+      scoreDisp.textContent = "0";
+      timerDisp.textContent = GAME_DURATION;
+      progressBar.style.width = "100%";
+      moons.forEach((m) => m.remove());
+      moons = [];
+      overlay.style.display = "none";
+      basketX = area.clientWidth / 2;
+      basket.style.left = basketX + "px";
+
+      spawnInterval = setInterval(spawnMoon, 700);
+      const rafLoop = () => {
+        if (gameActive) {
+          gameLoop();
+          requestAnimationFrame(rafLoop);
+        }
+      };
+      requestAnimationFrame(rafLoop);
+
+      gameInterval = setInterval(() => {
+        timeLeft--;
+        timerDisp.textContent = timeLeft;
+        const pct = (timeLeft / GAME_DURATION) * 100;
+        progressBar.style.width = pct + "%";
+        progressBar.style.background =
+          timeLeft <= 5
+            ? "linear-gradient(90deg,#ff4444,#ff8800)"
+            : "linear-gradient(90deg,#f0c040,#ff9900)";
+        if (timeLeft <= 0) endGame();
+      }, 1000);
+    }
+
+    function endGame() {
+      gameActive = false;
+      clearInterval(spawnInterval);
+      clearInterval(gameInterval);
+      moons.forEach((m) => m.remove());
+      moons = [];
+
+      const msg =
+        score >= 20
+          ? "🎉 Perfect! Eid Mubarak!"
+          : score >= 15
+            ? "⭐ Excellent!"
+            : score >= 10
+              ? "🌙 Great job!"
+              : score >= 5
+                ? "👍 Good effort!"
+                : "🌑 Try again!";
+
+      overlay.innerHTML = `
+      <div style="font-size:48px;margin-bottom:4px;">${score >= 10 ? "🌙" : "🌑"}</div>
+      <h2 style="color:#f0c040;font-size:24px;font-weight:500;margin:0 0 4px;">Time's Up!</h2>
+      <p style="color:rgba(255,255,255,0.6);font-size:13px;margin:0 0 8px;">${msg}</p>
+      <p style="color:rgba(255,255,255,0.5);font-size:13px;margin:0 0 2px;">Your Score</p>
+      <div class="score-big">${score}<span style="font-size:20px;color:rgba(240,192,64,0.6);"> / 20</span></div>
+      <button id="play-btn" onclick="startGame()" style="background:linear-gradient(135deg,#c8860a,#f0c040);color:#1a0a3e;border:none;border-radius:28px;padding:12px 36px;font-size:16px;font-weight:500;cursor:pointer;margin-top:16px;">Play Again ✨</button>
+    `;
+      overlay.style.display = "flex";
+      progressBar.style.width = "0%";
+    }
+
+    window.startGame = startGame;
+  })();
+</script>
